@@ -1,0 +1,95 @@
+import urllib.request
+
+import requests
+import json
+import pickle
+
+import html
+
+def data_updater_aid(id_num):#获得一个u主的视频列表信息
+    
+    url = 'https://api.bilibili.com/x/space/arc/search?mid='+ str(id_num) + '&ps=30&tid=0&pn='
+
+    
+    list_videoes = []
+    list_pic_url = []
+    list_time = []
+    list_pic = []
+    list_title = []
+    list_length = []
+    list_play = []
+    
+    #response = urllib.request.urlopen(url)
+
+    request = urllib.request.Request(url)
+    header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
+        }
+
+    request.add_header("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36")
+    response = requests.get(url + str(1),)
+
+    response_json = json.loads(response.text)
+    
+    count = response_json['data']['page']['count']
+    ps = 30
+    page = int(count/ps)
+    if(count%ps >= 1):
+        page += 1
+    
+    for i in range(500,page):
+        url_1 = url + str(i+1)
+        response_1 = json.loads(requests.get(url_1).text)
+        
+        for j in response_1['data']['list']['vlist']:
+            if(j['is_union_video'] == 0):
+                print('@@')
+                list_videoes.append(j['aid'])
+                list_pic_url.append(j['pic'])
+                list_time.append(int(j['created'])/3000)
+                list_length.append(j['length'])
+                list_title.append(j['title'])
+                list_play.append(int(j['play']))
+    return list_videoes,list_pic_url,list_time,list_length,list_title,list_play
+    
+def add_fav(avid):
+    header = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36",
+              'Cookie':"finger=-1290584503;_uuid=D07A02C1-4FE0-792E-B48E-4F360DC4847993387infoc; buvid3=D9276277-58E3-4013-8BFD-02394D236955155817infoc; LIVE_BUVID=AUTO8815847082865372; rpdid=|(k|k)k~)|J~0J'ul)R~|)mY|; sid=92uedlha; DedeUserID=8608856; DedeUserID__ckMd5=40bd2ec7b393199f; SESSDATA=b1feb04a%2C1609403413%2Ce7aba*71; bili_jct=2c5d12a842c072baed2f25468399cb7f; blackside_state=1; CURRENT_FNVAL=80; CURRENT_QUALITY=64; bp_t_offset_8608856=456329486243123565; PVID=1; bp_video_offset_8608856=457702759088257766; bfe_id=7b6a677b97d4786cd8b2f807c787d88b"}
+    url = 'https://api.bilibili.com/x/v3/fav/resource/deal'
+    data = {"rid":'46716947','type':'2','add_media_ids':'70149256','csrf':''}
+    data['add_media_ids'] = '1138935056'
+    data['rid'] = avid
+
+    session = requests.session()
+    post_obj = session.post(url, params = data,headers = header)
+    print(post_obj.text)
+def add_fav_many(mid):##添加收藏夹
+
+
+    '''
+    list_videoes,list_pic_url,list_time,list_length,list_title,list_play = data_updater_aid(mid)
+    
+    
+    dic_videos = dict(zip(list_videoes,list_play))
+    
+
+    #保存变量
+    
+    with open('saved_list.data','wb') as w:
+        pickle.dump(dic_videos,w)
+        #pickle.load(w)
+    '''
+    
+    with open('saved_list.data','rb') as w:
+        dic_videos = pickle.load(w)
+    
+    d_order = sorted(dic_videos.items(),key=lambda x:x[1],reverse=True)
+    count = 0
+    for i in d_order[601:800]:
+
+        time.sleep(0.3)
+        print(i)
+        add_fav(i[0])
+        count += 1
+        
+        
+#add_fav_many(258457966)  
